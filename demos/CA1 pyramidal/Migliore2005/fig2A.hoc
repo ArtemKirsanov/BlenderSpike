@@ -1,0 +1,224 @@
+load_file("nrngui.hoc")
+cvode_active(1)
+
+numaxon=1
+numsoma=1
+numbasal=52
+numapical=70
+numtrunk=49
+
+xopen("geo5038804.hoc")             // geometry file
+xopen("fixnseg.hoc")           
+
+Rm = 28000
+RmDend = Rm
+RmSoma = Rm
+RmAx = Rm
+
+Cm    = 1
+CmSoma= Cm
+CmAx  = Cm
+CmDend = Cm
+
+RaAll= 150
+RaSoma=150  
+RaAx = 50
+
+Vrest = -65
+dt = 0.1
+gna =  .025
+AXONM = 5
+gkdr = 0.01
+celsius = 35.0  
+KMULT =  0.03
+KMULTP = 0.03
+ghd=0.00005
+
+objref g, b,c, stim, distrx, distry, cdistry, p
+
+forsec "axon" {insert pas e_pas=Vrest g_pas = 1/RmAx Ra=RaAx cm=CmAx}
+forsec "soma" {insert pas e_pas=Vrest g_pas = 1/RmSoma Ra=RaSoma cm=CmSoma}
+forsec "dendrite"{insert pas e_pas=Vrest g_pas = 1/RmDend Ra=RaAll cm=CmDend}
+forsec "user5" {insert pas e_pas=Vrest g_pas = 1/RmDend Ra=RaAll cm=CmDend}
+
+access soma
+
+freq=50
+geom_nseg()
+tot=0
+forall {tot=tot+nseg}
+distance()
+
+tstop=20
+
+b = new VBox()
+b.intercept(1)
+g = new Graph()
+g.size(0,tstop,-70,30)
+g.addvar("soma.v(0.5)",1,1,2*tstop,0,2)
+g.xaxis(1)
+c = new Graph()
+c.size(0,740,0,100)
+c.xaxis(1)
+c.exec_menu("10% Zoom out")
+c.color(1)
+c.label(0.4,0.8," peak AP")
+xpanel("")
+xbutton("runm ", "runm()")
+xpanel()
+b.intercept(0)
+b.map()
+
+p = new PlotShape()
+p.exec_menu("Shape Plot")
+p.size(-194.658,304.758,-223.667,609.667)
+p.variable("v")
+p.show(0)
+
+rel=0.5
+soma {
+stim= new IClamp(rel)
+stim.amp=2.5
+stim.dur=1.5
+stim.del=1
+}
+
+forsec "axon" {   
+                insert nax gbar_nax=gna * AXONM
+                insert kdr gkdrbar_kdr=gkdr
+                insert kap gkabar_kap = KMULTP
+}
+
+forsec "soma" {   
+		insert hd ghdbar_hd=ghd	vhalfl_hd=-73
+                insert na3 gbar_na3=gna
+                insert kdr gkdrbar_kdr=gkdr
+                insert kap gkabar_kap = KMULTP
+}
+
+for i=0, numbasal-1 dendrite[i] {
+		insert hd ghdbar_hd=ghd vhalfl_hd=-73
+                insert na3 gbar_na3=gna
+                insert kdr gkdrbar_kdr=gkdr
+		insert kap gkabar_kap=0
+		insert kad gkabar_kad=0
+
+		for (x) if (x>0 && x<1) { xdist = distance(x)
+                	ghdbar_hd(x) = ghd*(1+3*xdist/100)
+                		if (xdist > 100){
+					vhalfl_hd=-81
+                        		gkabar_kad(x) = KMULT*(1+xdist/100)
+                			} else {
+					vhalfl_hd=-73
+                        		gkabar_kap(x) = KMULTP*(1+xdist/100)
+               				}
+		}
+}
+                
+forsec "apical_dendrite" {
+	insert ds
+		insert hd ghdbar_hd=ghd
+                insert na3 gbar_na3=gna
+                insert kdr gkdrbar_kdr=gkdr
+		insert kap gkabar_kap=0
+		insert kad gkabar_kad=0
+
+		for (x) if (x>0 && x<1) { xdist = distance(x)
+                	ghdbar_hd(x) = ghd*(1+3*xdist/100)
+                		if (xdist > 100){
+					vhalfl_hd=-81
+                        		gkabar_kad(x) = KMULT*(1+xdist/100)
+                			} else {
+					vhalfl_hd=-73
+                        		gkabar_kap(x) = KMULTP*(1+xdist/100)
+               				}
+		}
+}
+
+forsec "user5" {
+	insert ds
+		insert hd ghdbar_hd=ghd
+                insert na3 gbar_na3=gna
+                insert kdr gkdrbar_kdr=gkdr
+		insert kap gkabar_kap=0
+		insert kad gkabar_kad=0
+
+		for (x) if (x>0 && x<1) { xdist = distance(x)
+                	ghdbar_hd(x) = ghd*(1+3*xdist/100)
+                		if (xdist > 100){
+					vhalfl_hd=-81
+                        		gkabar_kad(x) = KMULT*(1+xdist/100)
+                			} else {
+					vhalfl_hd=-73
+                        		gkabar_kap(x) = KMULTP*(1+xdist/100)
+               				}
+		}
+}
+
+proc init() {
+	t=0
+        forall {
+        v=Vrest
+        if (ismembrane("nax") || ismembrane("na3")) {ena=55}
+        if (ismembrane("kdr") || ismembrane("kap") || ismembrane("kad")) {ek=-90}
+        if (ismembrane("hd") ) {ehd_hd=-30}
+	}
+	finitialize(Vrest)
+        fcurrent()
+
+        forall {
+	for (x) {
+	if (ismembrane("na3")||ismembrane("nax")){e_pas(x)=v(x)+(ina(x)+ik(x))/g_pas(x)}
+	if (ismembrane("hd")) {e_pas(x)=e_pas(x)+i_hd(x)/g_pas(x)}
+		}
+	}
+	cvode.re_init()
+	cvode.event(tstop)
+	access soma
+	g.begin()
+}
+
+
+proc advance() {
+	fadvance()
+	g.plot(t)
+	g.flush()
+	p.flush()
+	doNotify()
+}
+
+proc runp() {
+stdinit()
+continuerun(tstop)
+
+	distrx=new Vector()
+	distry=new Vector()
+	forsec "apical_dendrite" {
+		for (x) if (x>0 && x<1) {
+			if (diam>=0.) {
+			distrx.append(distance(x)) 
+			distry.append(vmax_ds(x)-Vrest)
+			}
+		}
+	}
+	distry.mark(c,distrx,"O",3,3,2)
+
+	distrx=new Vector()
+	distry=new Vector()
+	forsec "user5" {
+		for (x) if (x>0 && x<1) {
+			if (diam>=0) {
+			distrx.append(distance(x)) 
+			distry.append(vmax_ds(x)-Vrest)
+			}
+		}
+	}
+	distry.mark(c,distrx,"t",5,$1,1)
+	c.flush()
+	doNotify()
+
+}
+
+proc runm() {
+runp(1)
+}
