@@ -194,6 +194,7 @@ Inside Blender the spatial profile of voltage is represented as a custom **Verte
 <p align="center">
   <img src="assets/Blender interface - spreadsheet.png" width="400"
  </p>
+  
 Updating the voltage profile in time relies on using `frame_change_post` [handler](https://docs.blender.org/api/current/bpy.app.handlers.html).
 
 Every time you build a neuron, internally an instance of `BlenderNeuron` class is created. It has a `voltage_handler` method that loops over all the sections and sets the voltage attribute according to a current frame (as a lookup from the .pickle file). To be automatically called every time the frame changes, the `voltage_handler` method of a given neuron should be appended to the list of Blender's `frame_change_post` handlers.
