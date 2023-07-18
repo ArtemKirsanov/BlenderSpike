@@ -28,7 +28,7 @@ An add-on for Blender, to create 3D activity animations of [NEURON](https://neur
 If you wish to run your own simulations, you will need to install a copy of NEURON (see [instructions](https://nrn.readthedocs.io/en/8.2.2/install/install.html)). After this, install the Python companion module by running:
 
 ```python
-pip install .
+pip install git+https://github.com/ArtemKirsanov/BlenderSpike.git
 ```
 
 (install it to the same environment that contains NEURON)
@@ -72,8 +72,7 @@ BlenderSpike pulls geometry and 3D location data from NEURON objects and operate
 
 4) Select the neuron parent object and click "Create a voltage coloring"
 
-<video src="assets/BlenderSpike walkthrough.mp4",controls autoplay loop> </video>
-
+[![BlenderSpike Walkthrough](assets/walkthrough-youtube-preview.png)](https://youtu.be/uSeatDUqmas "BlenderSpike Walkthrough")
 
 
 ## 🎨 Customizing neurons
@@ -90,10 +89,11 @@ BlenderSpike uses internal coordinates of NEURON (eg. `nrn.Section.x3d`) to posi
   <img src="assets/Customization – coordinates.png" width="500"
  </p>
 
-```
+
 > **Note**
+> 
 > Coordinates from `.pickle` will be divided (not multiplied) by the downscale factor
-```
+
 
 ### Geometry  📐
 
