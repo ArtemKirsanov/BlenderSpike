@@ -15,6 +15,7 @@ An add-on for Blender, to create 3D activity animations of [NEURON](https://neur
   <img src="assets/overview.gif" width="1000"
  </p>
 
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/purple_img.png)](https://www.buymeacoffee.com/artemkirsanov)
 
 
 ## Installation
