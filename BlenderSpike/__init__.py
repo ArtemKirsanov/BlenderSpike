@@ -18,8 +18,8 @@ def check_and_install_modules():
     '''
         Automatically install required Python modules
     '''
-    required_modules_import_names = ["matplotlib","seaborn", "cmasher", "numpy"]  # Required Python modules
-    required_modules_install_names = ["matplotlib","seaborn", "cmasher", "numpy"]
+    required_modules_import_names = ["matplotlib","seaborn", "cmasher", "numpy", "scipy"]  # Required Python modules
+    required_modules_install_names = ["matplotlib","seaborn", "cmasher", "numpy", "scipy"]
 
 
     missing_modules = []
