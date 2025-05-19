@@ -89,11 +89,11 @@ class CellRecorder():
 
         if voltage_data is None:
             voltage_data = [matrix_from_monitor(mon) for mon in self.monitors]
-        
+
         output = [
             blender_dict_from_section(
-                self.sections[k],k,voltage_data[k],FRAME_NUM
-            ) for k in range(len(self.sections))
+                sec,sec_index,voltage_data[sec_index],FRAME_NUM
+            ) for sec_index, sec in enumerate(self.sections)
         ]
 
         with open(filename, "wb") as f:
